@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { FeedItem } from '../models/FeedItem';
 import { requireAuth } from '../../users/routes/auth.router';
 import * as AWS from '../../../../aws';
+import { ResponseMIMEType } from 'aws-sdk/clients/sagemaker';
 
 const router: Router = Router();
 
@@ -18,13 +19,36 @@ router.get('/', async (req: Request, res: Response) => {
 
 //@TODO
 //Add an endpoint to GET a specific resource by Primary Key
+router.get('/:id', async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const item = await FeedItem.findByPk(id);
+
+    if (item.url) item.url = AWS.getGetSignedUrl(item.url);
+
+    res.send(item);
+});
 
 // update a specific resource
 router.patch('/:id', 
     requireAuth, 
     async (req: Request, res: Response) => {
         //@TODO try it yourself
-        res.send(500).send("not implemented")
+        const { id } = req.params;
+        const caption = req.body.caption;
+
+        if (!caption)
+            return res.status(200).send({message: "Nothing to update. Only caption can be updated currently."});
+
+        const item = await FeedItem.findByPk(id);
+
+        if (item) {
+            item.caption = caption;
+            const newItem = await item.save();
+            newItem.url = AWS.getGetSignedUrl(item.url);
+            res.status(201).send(newItem);
+        } 
+        else 
+            res.status(404).send({message: "Item with provided id not found"})
 });
 
 
