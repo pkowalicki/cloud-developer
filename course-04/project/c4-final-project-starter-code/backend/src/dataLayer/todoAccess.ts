@@ -1,5 +1,6 @@
 import { DocumentClient } from 'aws-sdk/clients/dynamodb'
 import { TodoItem } from '../models/TodoItem'
+import { TodoUpdate } from '../models/TodoUpdate'
 //import * as AWS from 'aws-sdk'
 //import * as AWSXRay from 'aws-xray-sdk'
 
@@ -58,8 +59,34 @@ export class TodoAccess {
         return {}
     }
 
+
+    async UpdateTodo(userId: string, todoId: string, update: TodoUpdate): Promise<{}> {
+      const todoItem: TodoItem = await this.FindTodo(todoId)
+      const newDueDateISO: string = new Date(update.dueDate).toISOString()
+
+      await this.docClient.update({
+            TableName: this.todoItemsTable,
+            Key: {
+                'userId' : userId,
+                'createdAt': todoItem.createdAt
+            },
+            UpdateExpression: 'set #nameAttribute = :name, dueDate = :dueDate, done = :done',
+            ExpressionAttributeNames: {
+              '#nameAttribute': 'name'
+            },
+            ExpressionAttributeValues: {
+              ':name': update.name,
+              ':dueDate': newDueDateISO,
+              ':done': update.done
+            }
+      }).promise()
+
+      return {}
+    }
+
     async FindTodo(todoId: string): Promise<TodoItem> {
-        const items = await this.docClient.query({
+        console.log('Looking for todo item for todoid: ', todoId)
+        const result = await this.docClient.query({
             TableName: this.todoItemsTable,
             IndexName : this.todoIdIndex,
             KeyConditionExpression: 'todoId = :todoId',
@@ -68,7 +95,27 @@ export class TodoAccess {
             }
           }).promise()
 
-        return items[0]
+        if (result.Count !== 0) {
+          const item = result.Items[0]
+
+          console.log('Found todo item: ', JSON.stringify(item))
+
+          return {
+            ...item
+          } as TodoItem
+
+          // return {
+          //   userId: item.userId,
+          //   todoId: item.todoId,
+          //   createdAt: item.createdAt,
+          //   name: item.name,
+          //   dueDate: item.dueDate,
+          //   done: item.done,
+          //   attachmentUrl: item.attachmentUrl
+          // }
+        }
+        
+        return undefined
     }
 
 }

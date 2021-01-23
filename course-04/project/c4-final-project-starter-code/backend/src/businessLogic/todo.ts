@@ -3,6 +3,7 @@ import * as uuid from 'uuid'
 import { TodoAccess } from "../dataLayer/todoAccess";
 import { TodoItem } from "../models/TodoItem";
 import { CreateTodoRequest } from "../requests/CreateTodoRequest";
+import { UpdateTodoRequest } from '../requests/UpdateTodoRequest';
 
 const todoAccess = new TodoAccess()
 const bucketName = process.env.ATTACHMENTS_S3_BUCKET
@@ -30,4 +31,8 @@ export async function getTodoItems(user: string): Promise<TodoItem[]> {
 
 export async function deleteTodoItem(user: string, todoId: string): Promise<{}> {
     return await todoAccess.DeleteTodo(user, todoId)
+}
+
+export async function updateTodoItem(user: string, todoId: string, update: UpdateTodoRequest): Promise<{}> {
+    return await todoAccess.UpdateTodo(user, todoId, update)
 }
