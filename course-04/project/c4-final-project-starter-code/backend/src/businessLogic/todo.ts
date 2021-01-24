@@ -6,7 +6,6 @@ import { CreateTodoRequest } from "../requests/CreateTodoRequest";
 import { UpdateTodoRequest } from '../requests/UpdateTodoRequest';
 
 const todoAccess = new TodoAccess()
-const bucketName = process.env.ATTACHMENTS_S3_BUCKET
 
 export async function createTodoItem(item: CreateTodoRequest, user: string) : Promise<TodoItem> {
 
@@ -20,8 +19,7 @@ export async function createTodoItem(item: CreateTodoRequest, user: string) : Pr
         createdAt: timestamp,
         name: item.name,
         dueDate: dueDate,
-        done: false,
-        attachmentUrl: `https://${bucketName}.s3.amazonaws.com/${todoId}`
+        done: false
     })    
 }
 
@@ -29,10 +27,14 @@ export async function getTodoItems(user: string): Promise<TodoItem[]> {
     return await todoAccess.GetAllTodos(user);
 }
 
-export async function deleteTodoItem(user: string, todoId: string): Promise<{}> {
+export async function deleteTodoItem(user: string, todoId: string): Promise<boolean> {
     return await todoAccess.DeleteTodo(user, todoId)
 }
 
-export async function updateTodoItem(user: string, todoId: string, update: UpdateTodoRequest): Promise<{}> {
+export async function updateTodoItem(user: string, todoId: string, update: UpdateTodoRequest): Promise<boolean> {
     return await todoAccess.UpdateTodo(user, todoId, update)
+}
+
+export async function updateAttachmentUrl(user: string, todoId: string): Promise<string> {
+    return await todoAccess.UpdateAttachmentUrl(user, todoId)
 }
