@@ -53,6 +53,8 @@ export class TodoAccess {
     const todoItem: TodoItem = await this.FindTodo(todoId)
 
     if (todoItem) {
+      const attachmentExists: boolean = todoItem.attachmentUrl ? true : false
+
       await this.docClient.delete({
         TableName: this.todoItemsTable,
         Key: {
@@ -67,8 +69,12 @@ export class TodoAccess {
 
       logger.info(`Deleted TODO item with id ${todoId} for user ${userId}`, { user: userId, todoId: todoId })
 
-      return true
+      if (attachmentExists) {
+        await this.deleteTodoImage(todoId)
+        logger.info(`Deleted attachment for item ${todoId}`, { user: userId, todoId: todoId })
+      }
 
+      return true
     } else {
       logger.warn(`Could not find TODO item with id ${todoItem}`, { user: userId, todoId: todoItem })
 
@@ -130,7 +136,7 @@ export class TodoAccess {
         }
       }).promise()
 
-      logger.info(`Attachment URL updated for item: ${attachmentUrl}`, { attachmentUrl: attachmentUrl, todoId : todoId, user: userId })
+      logger.info(`Attachment URL updated for item: ${attachmentUrl}`, { attachmentUrl: attachmentUrl, todoId: todoId, user: userId })
 
       return this.getUploadUrl(todoId)
     } else {
@@ -171,6 +177,13 @@ export class TodoAccess {
       Key: todoId,
       Expires: urlExpiration
     })
+  }
+
+  deleteTodoImage(todoId: string) {
+    return this.s3Client.deleteObject({
+      Bucket: bucketName,
+      Key: todoId
+    }).promise()
   }
 
 } // end of data access class
