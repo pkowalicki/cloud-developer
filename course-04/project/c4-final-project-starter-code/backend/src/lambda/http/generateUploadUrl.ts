@@ -1,22 +1,9 @@
 import 'source-map-support/register'
-
 import { APIGatewayProxyEvent, APIGatewayProxyResult, APIGatewayProxyHandler } from 'aws-lambda'
-
-//import * as AWS from 'aws-sdk'
-//import * as AWSXRay from 'aws-xray-sdk'
 import { getUserId } from '../utils'
 import { updateAttachmentUrl } from '../../businessLogic/todo'
 import { createLogger } from '../../utils/logger'
 
-// const AWS = require('aws-sdk')
-// const AWSXRay = require('aws-xray-sdk')
-
-// const s3 = new AWS.S3({
-//   signatureVersion: 'v4'
-// })
-// const xs3 = AWSXRay.captureAWSClient(s3)
-// const bucketName = process.env.ATTACHMENTS_S3_BUCKET
-// const urlExpiration = process.env.SIGNED_URL_EXPIRATION
 
 const logger = createLogger('generate-upload-url-function')
 
@@ -53,10 +40,3 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
   }
 }
 
-// function getUploadUrl(todoId: string) {
-//   return xs3.getSignedUrl('putObject', {
-//     Bucket: bucketName,
-//     Key: todoId,
-//     Expires: urlExpiration
-//   })
-// }
