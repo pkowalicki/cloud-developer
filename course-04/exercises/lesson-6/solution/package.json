@@ -8,7 +8,6 @@
   },
   "dependencies": {
     "aws-serverless-express": "^3.3.6",
-    "aws-xray-sdk": "^2.3.3",
     "elasticsearch": "^15.5.0",
     "express": "^4.17.1",
     "http-aws-es": "^6.0.0",
@@ -25,6 +24,7 @@
     "@types/jsonwebtoken": "^8.3.2",
     "@types/node": "^10.14.12",
     "aws-sdk": "^2.492.0",
+    "aws-xray-sdk": "^2.5.0",
     "jest": "^24.8.0",
     "serverless-aws-documentation": "^1.1.0",
     "serverless-dynamodb-local": "^0.2.38",
