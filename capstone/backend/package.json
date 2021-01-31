@@ -15,7 +15,8 @@
     "jsonwebtoken": "^8.5.1",
     "middy": "^0.25.0",
     "source-map-support": "^0.5.11",
-    "uuid": "^3.3.2"
+    "uuid": "^3.3.2",
+    "winston": "^3.3.3"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.28",
@@ -28,7 +29,7 @@
     "jest": "^24.8.0",
     "serverless-aws-documentation": "^1.1.0",
     "serverless-dynamodb-local": "^0.2.38",
-    "serverless-iam-roles-per-function": "^1.0.4",
+    "serverless-iam-roles-per-function": "^3.1.0",
     "serverless-offline": "^4.10.6",
     "serverless-plugin-canary-deployments": "^0.4.7",
     "serverless-reqvalidator-plugin": "^1.0.3",

@@ -9,6 +9,11 @@ const app = express()
 app.get('/groups', async (_req, res) => {
   const groups = await getAllGroups()
 
+  res.set({
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Credentials': true
+  })
+
   res.json({
     items: groups
   })

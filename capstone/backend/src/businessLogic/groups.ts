@@ -3,7 +3,7 @@ import * as uuid from 'uuid'
 import { Group } from '../models/Group'
 import { GroupAccess } from '../dataLayer/groupsAccess'
 import { CreateGroupRequest } from '../requests/CreateGroupRequest'
-import { getUserId } from '../auth/utils'
+import { parseUserId } from '../auth/utils'
 
 const groupAccess = new GroupAccess()
 
@@ -17,7 +17,7 @@ export async function createGroup(
 ): Promise<Group> {
 
   const itemId = uuid.v4()
-  const userId = getUserId(jwtToken)
+  const userId = parseUserId(jwtToken)
 
   return await groupAccess.createGroup({
     id: itemId,

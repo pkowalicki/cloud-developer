@@ -2,9 +2,8 @@ import { SNSHandler, SNSEvent, S3Event } from 'aws-lambda'
 import 'source-map-support/register'
 import * as AWS  from 'aws-sdk'
 import * as AWSXRay from 'aws-xray-sdk'
-const XAWS = AWSXRay.captureAWS(AWS)
 
-const docClient = new XAWS.DynamoDB.DocumentClient()
+const docClient = createDynamoDBClient()
 
 const connectionsTable = process.env.CONNECTIONS_TABLE
 const stage = process.env.STAGE
@@ -12,7 +11,7 @@ const apiId = process.env.API_ID
 
 const connectionParams = {
   apiVersion: "2018-11-29",
-  endpoint: `${apiId}.execute-api.us-east-1.amazonaws.com/${stage}`
+  endpoint: `${apiId}.execute-api.eu-central-1.amazonaws.com/${stage}`
 }
 
 const apiGateway = new AWS.ApiGatewayManagementApi(connectionParams)
@@ -71,4 +70,31 @@ async function sendMessageToClient(connectionId, payload) {
 
     }
   }
+}
+
+function createDynamoDBClient() {
+  const localParams = {
+    region: 'localhost',
+    endpoint: 'http://localhost:8000'
+  }
+
+  let client
+
+  if (process.env.IS_OFFLINE) {
+    console.log('Creating a local DynamoDB instance')
+
+    client = new AWS.DynamoDB.DocumentClient({
+      service: new AWS.DynamoDB(localParams)
+    });
+  } else {
+    console.log('Crating client for remote DB instance')
+
+    client = new AWS.DynamoDB.DocumentClient({
+      service: new AWS.DynamoDB()
+    })
+  }
+
+  AWSXRay.captureAWSClient(client.service)
+
+  return client
 }

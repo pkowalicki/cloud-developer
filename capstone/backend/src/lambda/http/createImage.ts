@@ -9,7 +9,8 @@ import * as AWSXRay from 'aws-xray-sdk'
 const XAWS = AWSXRay.captureAWS(AWS)
 
 
-const docClient = new XAWS.DynamoDB.DocumentClient()
+const docClient = createDynamoDBClient()
+
 const s3 = new XAWS.S3({
   signatureVersion: 'v4'
 })
@@ -94,6 +95,33 @@ function getUploadUrl(imageId: string) {
   return s3.getSignedUrl('putObject', {
     Bucket: bucketName,
     Key: imageId,
-    Expires: urlExpiration
+    Expires: Number.parseInt(urlExpiration)
   })
+}
+
+function createDynamoDBClient() {
+  const localParams = {
+    region: 'localhost',
+    endpoint: 'http://localhost:8000'
+  }
+
+  let client
+
+  if (process.env.IS_OFFLINE) {
+    console.log('Creating a local DynamoDB instance')
+
+    client = new AWS.DynamoDB.DocumentClient({
+      service: new AWS.DynamoDB(localParams)
+    });
+  } else {
+    console.log('Crating client for remote DB instance')
+
+    client = new AWS.DynamoDB.DocumentClient({
+      service: new AWS.DynamoDB()
+    })
+  }
+
+  AWSXRay.captureAWSClient(client.service)
+
+  return client
 }
