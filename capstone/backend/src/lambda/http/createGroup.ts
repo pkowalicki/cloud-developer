@@ -3,16 +3,17 @@ import 'source-map-support/register'
 
 import { CreateGroupRequest } from '../../requests/CreateGroupRequest'
 import { createGroup } from '../../businessLogic/groups'
+import { createLogger } from '../../utils/logger'
+import { getUserId } from '../utils'
+
+const logger = createLogger('lambda-http-create-group')
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  console.log('Processing event: ', event)
-
-  const newGroup: CreateGroupRequest = JSON.parse(event.body)
-  const authorization = event.headers.Authorization
-  const split = authorization.split(' ')
-  const jwtToken = split[1]
-
-  const newItem = await createGroup(newGroup, jwtToken)
+  const newGroupRequest: CreateGroupRequest = JSON.parse(event.body)
+  logger.info(`Processing new group request`, {...newGroupRequest})
+  const user: string = getUserId(event)
+  const newGroup = await createGroup(newGroupRequest,user)
+  logger.info(`New group created for user ${user}`, {...newGroup})
 
   return {
     statusCode: 201,
@@ -21,7 +22,7 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
       'Access-Control-Allow-Credentials': true
     },
     body: JSON.stringify({
-      newItem
+      newGroup
     })
   }
 }

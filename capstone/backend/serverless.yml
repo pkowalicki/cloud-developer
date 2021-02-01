@@ -27,9 +27,14 @@ provider:
 
   environment:
     GROUPS_TABLE: Groups-${self:provider.stage}
+    GROUPS_ID_INDEX: Groups-IdIndex-${self:provider.stage}
+    GROUPS_PUBLIC_INDEX: Groups-PublicIndex-${self:provider.stage}
+
     IMAGES_TABLE: Images-${self:provider.stage}
-    IMAGE_ID_INDEX: ImageIdIndex
+    IMAGE_ID_INDEX: Images-IdIndex-${self:provider.stage}
+
     CONNECTIONS_TABLE: Connections-${self:provider.stage}
+
     IMAGES_S3_BUCKET: serverless-udagram-images-pkowalic-${self:provider.stage}
     SIGNED_URL_EXPIRATION: 300
     THUMBNAILS_S3_BUCKET: serverless-udagram-thumbnail-pkowalic-${self:provider.stage}
@@ -243,11 +248,32 @@ resources:
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
+          - AttributeName: userId
+            AttributeType: S
+          - AttributeName: createdAt
+            AttributeType: S
+          - AttributeName: public
+            AttributeType: BOOL
         KeySchema:
-          - AttributeName: id
+          - AttributeName: userId
             KeyType: HASH
+          - AttributeName: createdAt
+            KeyType: RANGE
         BillingMode: PAY_PER_REQUEST
         TableName: ${self:provider.environment.GROUPS_TABLE}
+        GlobalSecondaryIndexes:
+          - IndexName: ${self:provider.environment.GROUPS_ID_INDEX}
+            KeySchema:
+            - AttributeName: id
+              KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+          - IndexName: ${self:provider.environment.GROUPS_PUBLIC_INDEX}
+            KeySchema:
+            - AttributeName: public
+              KeyType: HASH
+            Projection:
+              ProjectionType: ALL
 
     ImagesDynamoDBTable:
       Type: "AWS::DynamoDB::Table"
@@ -255,14 +281,14 @@ resources:
         AttributeDefinitions:
           - AttributeName: groupId
             AttributeType: S
-          - AttributeName: timestamp
+          - AttributeName: createdAt
             AttributeType: S
-          - AttributeName: imageId
+          - AttributeName: id
             AttributeType: S
         KeySchema:
           - AttributeName: groupId
             KeyType: HASH
-          - AttributeName: timestamp
+          - AttributeName: createdAt
             KeyType: RANGE
         BillingMode: PAY_PER_REQUEST
         StreamSpecification:
@@ -271,7 +297,7 @@ resources:
         GlobalSecondaryIndexes:
           - IndexName: ${self:provider.environment.IMAGE_ID_INDEX}
             KeySchema:
-            - AttributeName: imageId
+            - AttributeName: id
               KeyType: HASH
             Projection:
               ProjectionType: ALL
@@ -280,12 +306,10 @@ resources:
       Type: AWS::DynamoDB::Table
       Properties:
         AttributeDefinitions:
-          -
-            AttributeName: id
+          - AttributeName: id
             AttributeType: S
         KeySchema:
-          -
-            AttributeName: id
+          - AttributeName: id
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
         TableName: ${self:provider.environment.CONNECTIONS_TABLE}
