@@ -8,11 +8,15 @@
     },
     "description": {
       "type": "string"
+    },
+    "public": {
+      "type": "number"
     }
   },
   "required": [
     "name",
-    "description"
+    "description",
+    "public"
   ],
   "additionalProperties": false
 }

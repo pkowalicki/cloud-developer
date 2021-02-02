@@ -1,5 +1,6 @@
 import { DocumentClient } from 'aws-sdk/clients/dynamodb'
 import { Group } from '../models/Group'
+import { GroupUpdate } from '../models/GroupUpdate'
 import { createLogger } from '../utils/logger'
 import { dynamoDB } from './awsClients'
 
@@ -10,18 +11,22 @@ export class GroupAccess {
   constructor(
     private readonly docClient: DocumentClient = dynamoDB,
     private readonly groupsTable = process.env.GROUPS_TABLE,
-    private readonly groupsIdIndex = process.env.GROUPS_ID_INDEX) {
+    private readonly groupsIdIndex = process.env.GROUPS_ID_INDEX,
+    private readonly groupsPublicIndex = process.env.GROUPS_PUBLIC_INDEX) {
   }
 
 
   async getUserGroups(userId: string): Promise<Group[]> {
-
     const result = await this.docClient.query({
       TableName: this.groupsTable,
-      KeyConditionExpression: 'userId = :userId AND public = :public',
+      KeyConditionExpression: 'userId = :userId',
+      FilterExpression: '#publicAttribute = :public',
+      ExpressionAttributeNames: {
+        '#publicAttribute': 'public'
+      },
       ExpressionAttributeValues: {
         ':userId': userId,
-        ':public': false
+        ':public': 0
       }
     }).promise()
 
@@ -35,10 +40,13 @@ export class GroupAccess {
   async getPublicGroups(): Promise<Group[]> {
     const result = await this.docClient.query({
       TableName: this.groupsTable,
-      IndexName: this.groupsIdIndex,
-      KeyConditionExpression: 'public= :public',
+      IndexName: this.groupsPublicIndex,
+      KeyConditionExpression: '#publicAttribute = :public',
+      ExpressionAttributeNames: {
+        '#publicAttribute': 'public'
+      },
       ExpressionAttributeValues: {
-        ':public': true
+        ':public': 1
       }
     }).promise()
 
@@ -65,6 +73,38 @@ export class GroupAccess {
     logger.info(`New group created`, {...group})
 
     return group
+  }
+
+  async updateGroup(user: string, groupId: string, update: GroupUpdate): Promise<boolean> {
+    const group: Group = await this.findGroup(groupId)
+
+    if (group) {
+      await this.docClient.update({
+        TableName: this.groupsTable,
+        Key: {
+          'userId': user,
+          'createdAt': group.createdAt
+        },
+        UpdateExpression: 'set #nameAttr = :name, description = :description, #publicAttr = :public',
+        ExpressionAttributeNames: {
+          '#nameAttr':'name',
+          '#publicAttr':'public'
+        },
+        ExpressionAttributeValues: {
+          ':name':update.name,
+          ':description':update.description,
+          ':public':update.public
+        }
+      }).promise()
+
+      logger.info(`Group with id ${groupId} was updated`, {'groupId':groupId, 'update': update})
+
+      return true
+    } else {
+      logger.warn(`Could not find group with id ${groupId}`, {'user':user, 'groupId':groupId})
+
+      return false
+    }
   }
 
 

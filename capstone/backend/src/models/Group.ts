@@ -4,5 +4,5 @@ export interface Group {
   description: string
   userId: string
   createdAt: string
-  public?: boolean
+  public: number
 }

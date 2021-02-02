@@ -1,59 +1,18 @@
 import { APIGatewayProxyHandler, APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import 'source-map-support/register'
-import * as AWS  from 'aws-sdk'
-import * as AWSXRay from 'aws-xray-sdk'
+import { createLogger } from '../../utils/logger'
+import { ConnectionsAccess } from '../../dataLayer/connectionsAccess'
 
-const docClient = createDynamoDBClient()
-
-const connectionsTable = process.env.CONNECTIONS_TABLE
+const connectionsAccess = new ConnectionsAccess()
+const logger = createLogger('lambda-ws-connect')
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  console.log('Websocket connect', event)
-
+  logger.info(`Websocket connect`, {event})
   const connectionId = event.requestContext.connectionId
-  const timestamp = new Date().toISOString()
-
-  const item = {
-    id: connectionId,
-    timestamp
-  }
-
-  console.log('Storing item: ', item)
-
-  await docClient.put({
-    TableName: connectionsTable,
-    Item: item
-  }).promise()
+  await connectionsAccess.addConnection(connectionId)
 
   return {
     statusCode: 200,
     body: ''
   }
-}
-
-function createDynamoDBClient() {
-  const localParams = {
-    region: 'localhost',
-    endpoint: 'http://localhost:8000'
-  }
-
-  let client
-
-  if (process.env.IS_OFFLINE) {
-    console.log('Creating a local DynamoDB instance')
-
-    client = new AWS.DynamoDB.DocumentClient({
-      service: new AWS.DynamoDB(localParams)
-    });
-  } else {
-    console.log('Crating client for remote DB instance')
-
-    client = new AWS.DynamoDB.DocumentClient({
-      service: new AWS.DynamoDB()
-    })
-  }
-
-  AWSXRay.captureAWSClient(client.service)
-
-  return client
 }

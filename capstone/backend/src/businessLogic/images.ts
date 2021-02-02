@@ -20,6 +20,6 @@ export async function createImage(newImage: CreateImageRequest, group: string): 
         id: imageId,
         title: newImage.title,
         groupId: group,
-        createdAt: new Date().toDateString()
+        createdAt: new Date().toISOString()
     })
 }
