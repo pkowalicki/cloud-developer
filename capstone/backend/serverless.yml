@@ -38,6 +38,8 @@ provider:
     IMAGES_S3_BUCKET: serverless-udagram-images-pkowalic-${self:provider.stage}
     SIGNED_URL_EXPIRATION: 300
     THUMBNAILS_S3_BUCKET: serverless-udagram-thumbnail-pkowalic-${self:provider.stage}
+
+    TOPIC: ${self:custom.topicName}
     # AUTH_0_SECRET_ID: Auth0Secret-${self:provider.stage}
     # AUTH_0_SECRET_FIELD: auth0Secret
 
@@ -89,6 +91,11 @@ provider:
         - dynamodb:PutItem
         - dynamodb:DeleteItem
       Resource: arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.CONNECTIONS_TABLE}
+    - Effect: Allow
+      Action:
+        - SNS:CreateTopic
+        - SNS:Publish
+      Resource: arn:aws:sns:${opt:region, self:provider.region}:*:${self:provider.environment.TOPIC}
     # - Effect: Allow
     #   Action:
     #     - secretsmanager:GetSecretValue
@@ -216,18 +223,18 @@ functions:
                 - ${self:custom.topicName}
           topicName: ${self:custom.topicName}
 
-  ResizeImage:
-    handler: src/lambda/s3/resizeImage.handler
-    events:
-      - sns:
-          arn:
-            Fn::Join:
-              - ':'
-              - - arn:aws:sns
-                - Ref: AWS::Region
-                - Ref: AWS::AccountId
-                - ${self:custom.topicName}
-          topicName: ${self:custom.topicName}
+  # ResizeImage:
+  #   handler: src/lambda/s3/resizeImage.handler
+  #   events:
+  #     - sns:
+  #         arn:
+  #           Fn::Join:
+  #             - ':'
+  #             - - arn:aws:sns
+  #               - Ref: AWS::Region
+  #               - Ref: AWS::AccountId
+  #               - ${self:custom.topicName}
+  #         topicName: ${self:custom.topicName}
 
   ConnectHandler:
     handler: src/lambda/websocket/connect.handler
@@ -349,10 +356,10 @@ resources:
       DependsOn: SNSTopicPolicy
       Properties:
         BucketName: ${self:provider.environment.IMAGES_S3_BUCKET}
-        NotificationConfiguration:
-          TopicConfigurations:
-            - Event: s3:ObjectCreated:Put
-              Topic: !Ref ImagesTopic
+        # NotificationConfiguration:
+        #   TopicConfigurations:
+        #     - Event: s3:ObjectCreated:Put
+        #       Topic: !Ref ImagesTopic
         CorsConfiguration:
           CorsRules:
             -
@@ -396,7 +403,7 @@ resources:
                 !Ref ImagesTopic
               Condition:
                 ArnLike:
-                  AWS:SourceArn: arn:aws:s3:::${self:provider.environment.IMAGES_S3_BUCKET}
+                  AWS:SourceArn: arn:aws:lamda:${opt:region, self:provider.region}::function:serverless-udagram-app*
         Topics:
           - !Ref ImagesTopic
 

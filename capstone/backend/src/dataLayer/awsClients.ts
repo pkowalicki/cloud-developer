@@ -23,5 +23,10 @@ function createS3Client() {
     })
 }
 
+function createSNSClient() {
+  return new XAWS.SNS({apiVersion: '2010-03-31'})
+}
+
 export const dynamoDB: DocumentClient = createDynamoDBClient()
 export const s3: AWS.S3 = createS3Client()
+export const sns: AWS.SNS = createSNSClient()

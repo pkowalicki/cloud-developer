@@ -2,7 +2,7 @@ import { DocumentClient } from 'aws-sdk/clients/dynamodb'
 import { Group } from '../models/Group'
 import { GroupUpdate } from '../models/GroupUpdate'
 import { createLogger } from '../utils/logger'
-import { dynamoDB } from './awsClients'
+import { dynamoDB, sns } from './awsClients'
 
 const logger = createLogger('data-layer-groups-access')
 
@@ -10,9 +10,11 @@ export class GroupAccess {
 
   constructor(
     private readonly docClient: DocumentClient = dynamoDB,
+    private readonly snsClient: AWS.SNS = sns,
     private readonly groupsTable = process.env.GROUPS_TABLE,
     private readonly groupsIdIndex = process.env.GROUPS_ID_INDEX,
-    private readonly groupsPublicIndex = process.env.GROUPS_PUBLIC_INDEX) {
+    private readonly groupsPublicIndex = process.env.GROUPS_PUBLIC_INDEX,
+    private readonly topicName = process.env.TOPIC) {
   }
 
 
@@ -99,6 +101,9 @@ export class GroupAccess {
 
       logger.info(`Group with id ${groupId} was updated`, {'groupId':groupId, 'update': update})
 
+      if (group.public == 0 && update.public == 1)
+        await this.notifyClients(groupId)
+
       return true
     } else {
       logger.warn(`Could not find group with id ${groupId}`, {'user':user, 'groupId':groupId})
@@ -133,5 +138,39 @@ export class GroupAccess {
 
     return undefined
   }
+
+  private async notifyClients(group: string) {
+    const topic = await this.snsClient.createTopic({Name:this.topicName}).promise()
+    const topicArn: string = topic.TopicArn
+    const updatedGroup: Group = await this.findGroup(group)
+
+    const params = {
+      Message:'Group made public',
+      MessageAttributes: {
+        groupId: {
+          DataType:'String',
+          StringValue:updatedGroup.id
+        },
+        groupName: {
+          DataType:'String',
+          StringValue:updatedGroup.name
+        },
+        userId: {
+          DataType:'String',
+          StringValue:updatedGroup.userId
+        },
+        public: {
+          DataType:'String',
+          StringValue:updatedGroup.public.toString()
+        }
+      },
+      TopicArn: topicArn
+    }
+
+    logger.info(`Sending SNS event to ${topicArn}`, {...updatedGroup})
+    await this.snsClient.publish(params).promise()
+  }
 } // end of groups data access class
+
+
 
