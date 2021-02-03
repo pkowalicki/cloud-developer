@@ -42,5 +42,19 @@ export class ConnectionsAccess {
 
     return true
   }
+
+
+  async getConnections(): Promise<string[]> {
+    const connections = await this.docClient.scan({
+      TableName: this.connectionsTable,
+    }).promise()
+
+    let connectionIds: string[] = []
+
+    for (const connection of connections.Items)
+      connectionIds.push(connection.id)
+
+    return connectionIds
+  }
 } // end of connections data access class
 
