@@ -23,9 +23,10 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
   const images = await getImages(groupId)
 
   return {
-    statusCode: 201,
+    statusCode: 200,
     headers: {
-      'Access-Control-Allow-Origin': '*'
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Credentials': true
     },
     body: JSON.stringify({
       items: images

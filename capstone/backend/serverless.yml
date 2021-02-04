@@ -39,6 +39,8 @@ provider:
     SIGNED_URL_EXPIRATION: 300
     THUMBNAILS_S3_BUCKET: serverless-udagram-thumbnail-pkowalic-${self:provider.stage}
 
+    EMAIL: udacitypkowalic@gmail.com
+
     TOPIC: ${self:custom.topicName}
     # AUTH_0_SECRET_ID: Auth0Secret-${self:provider.stage}
     # AUTH_0_SECRET_FIELD: auth0Secret
@@ -95,7 +97,19 @@ provider:
       Action:
         - SNS:CreateTopic
         - SNS:Publish
+        - SNS:GetTopicAttributes
       Resource: arn:aws:sns:${opt:region, self:provider.region}:*:${self:provider.environment.TOPIC}
+    - Effect: Allow
+      Action:
+        - ses:SendEmail
+        - ses:SendRawEmail
+      Resource: arn:aws:ses:${opt:region, self:provider.region}:*:identity/*
+    - Effect: Allow
+      Action:
+        - ses:ListVerifiedEmailAddresses
+        - ses:VerifyEmailIdentity
+      Resource:
+        - '*'
     # - Effect: Allow
     #   Action:
     #     - secretsmanager:GetSecretValue
@@ -106,7 +120,7 @@ provider:
     #   Resource: !GetAtt KMSKey.Arn
 
 custom:
-  topicName: imagesTopic-${self:provider.stage}
+  topicName: GroupUpdateTopic-${self:provider.stage}
 
   # serverless-offline:
   #   port: 3003
@@ -133,6 +147,9 @@ custom:
       - name: ImageRequest
         contentType: application/json
         schema: ${file(models/create-image-request.json)}
+      - name: RegisterEmailRequest
+        contentType: application/json
+        schema: ${file(models/register-email-request.json)}
 
 functions:
 
@@ -206,12 +223,12 @@ functions:
             requestModels:
               'application/json': ImageRequest
 
-  SendUploadNotifications:
+  SendGroupUpdateNotifications:
     environment:
       STAGE: ${self:provider.stage}
       API_ID:
         Ref: WebsocketsApi
-    handler: src/lambda/s3/sendNotifications.handler
+    handler: src/lambda/sns/sendNotifications.handler
     events:
       - sns:
           arn:
@@ -222,6 +239,34 @@ functions:
                 - Ref: AWS::AccountId
                 - ${self:custom.topicName}
           topicName: ${self:custom.topicName}
+
+  SendGroupUpdateEmailNotifications:
+    handler: src/lambda/sns/sendEmailNotifications.handler
+    events:
+      - sns:
+          arn:
+            Fn::Join:
+              - ':'
+              - - arn:aws:sns
+                - Ref: AWS::Region
+                - Ref: AWS::AccountId
+                - ${self:custom.topicName}
+          topicName: ${self:custom.topicName}
+
+  RegisterEmail:
+    handler: src/lambda/http/registerEmail.handler
+    events:
+      - http:
+          method: post
+          path: emails
+          cors: true
+          authorizer: RS256Auth
+          reqValidatorName: RequestBodyValidator
+          documentation:
+            summary: Register new email
+            description: Register new Email
+            requestModels:
+              'application/json': RegisterEmailRequest
 
   # ResizeImage:
   #   handler: src/lambda/s3/resizeImage.handler
@@ -353,7 +398,7 @@ resources:
 
     AttachmentsBucket:
       Type: AWS::S3::Bucket
-      DependsOn: SNSTopicPolicy
+      #DependsOn: SNSTopicPolicy
       Properties:
         BucketName: ${self:provider.environment.IMAGES_S3_BUCKET}
         # NotificationConfiguration:
@@ -400,22 +445,22 @@ resources:
                 AWS: "*"
               Action: sns:Publish
               Resource:
-                !Ref ImagesTopic
+                !Ref GroupUpdateTopic
               Condition:
                 ArnLike:
                   AWS:SourceArn: arn:aws:lamda:${opt:region, self:provider.region}::function:serverless-udagram-app*
         Topics:
-          - !Ref ImagesTopic
+          - !Ref GroupUpdateTopic
 
     ThumbnailsBucket:
       Type: AWS::S3::Bucket
       Properties:
         BucketName: ${self:provider.environment.THUMBNAILS_S3_BUCKET}
 
-    ImagesTopic:
+    GroupUpdateTopic:
       Type: AWS::SNS::Topic
       Properties:
-        DisplayName: Image bucket topic
+        DisplayName: Group update topic
         TopicName: ${self:custom.topicName}
 
     # ImagesSearch:
@@ -477,4 +522,3 @@ resources:
     #     Name: ${self:provider.environment.AUTH_0_SECRET_ID}
     #     Description: Auth0 secret
     #     KmsKeyId: !Ref KMSKey
-

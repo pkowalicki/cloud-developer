@@ -27,7 +27,6 @@ export const handler: SNSHandler = async (event: SNSEvent) => {
     for (const connection of connections) {
       await sendMessageToClient(connection, messageAttributes)
     }
-    //connections.forEach(async connection => await sendMessageToClient(connection, messageAttributes))
   }
 }
 
@@ -38,8 +37,6 @@ async function sendMessageToClient(connectionId: string, payload: any) {
     await apiGateway.postToConnection({
       ConnectionId: connectionId,
       Data: JSON.stringify(payload),
-    },(err, data) => {
-      logger.info(`Message sending callback to connection ${connectionId}`, {data: data, error: err, payload: payload})
     }).promise()
 
     logger.info(`Message sent to connection ${connectionId}`, {payload: payload})

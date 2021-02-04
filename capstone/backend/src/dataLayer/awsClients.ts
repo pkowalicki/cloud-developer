@@ -27,6 +27,11 @@ function createSNSClient() {
   return new XAWS.SNS({apiVersion: '2010-03-31'})
 }
 
+function createSESClient() {
+  return new XAWS.SES({ region: "eu-central-1"})
+}
+
 export const dynamoDB: DocumentClient = createDynamoDBClient()
 export const s3: AWS.S3 = createS3Client()
 export const sns: AWS.SNS = createSNSClient()
+export const ses: AWS.SES = createSESClient()
