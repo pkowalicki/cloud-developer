@@ -33,6 +33,9 @@ provider:
     IMAGES_TABLE: Images-${self:provider.stage}
     IMAGE_ID_INDEX: Images-IdIndex-${self:provider.stage}
 
+    EMAILS_TABLE: Emails-${self:provider.stage}
+    EMAILS_INDEX: Emails-Index-${self:provider.stage}
+
     CONNECTIONS_TABLE: Connections-${self:provider.stage}
 
     IMAGES_S3_BUCKET: serverless-udagram-images-pkowalic-${self:provider.stage}
@@ -95,6 +98,12 @@ provider:
       Resource: arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.CONNECTIONS_TABLE}
     - Effect: Allow
       Action:
+        - dynamodb:PutItem
+        - dynamodb:Query
+        - dynamodb:DeleteItem
+      Resource: arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.EMAILS_TABLE}
+    - Effect: Allow
+      Action:
         - SNS:CreateTopic
         - SNS:Publish
         - SNS:GetTopicAttributes
@@ -108,6 +117,7 @@ provider:
       Action:
         - ses:ListVerifiedEmailAddresses
         - ses:VerifyEmailIdentity
+        - ses:DeleteIdentity
       Resource:
         - '*'
     # - Effect: Allow
@@ -166,6 +176,16 @@ functions:
           method: get
           path: groups
           cors: true
+          authorizer: RS256Auth
+
+  GetGroup:
+    handler: src/lambda/http/getGroup.handler
+    events:
+      - http:
+          method: get
+          path: groups/{groupId}
+          cors: true
+          authorizer: RS256Auth
 
   CreateGroup:
     handler: src/lambda/http/createGroup.handler
@@ -267,6 +287,24 @@ functions:
             description: Register new Email
             requestModels:
               'application/json': RegisterEmailRequest
+
+  GetEmail:
+    handler: src/lambda/http/getEmail.handler
+    events:
+      - http:
+          method: get
+          path: emails
+          cors: true
+          authorizer: RS256Auth
+
+  DeregisterEmail:
+    handler: src/lambda/http/deregisterEmail.handler
+    events:
+      - http:
+          method: delete
+          path: emails
+          cors: true
+          authorizer: RS256Auth
 
   # ResizeImage:
   #   handler: src/lambda/s3/resizeImage.handler
@@ -386,6 +424,18 @@ resources:
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
         TableName: ${self:provider.environment.CONNECTIONS_TABLE}
+
+    EmailsDynamoDBTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: userId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: userId
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        TableName: ${self:provider.environment.EMAILS_TABLE}
 
     RequestBodyValidator:
       Type: AWS::ApiGateway::RequestValidator

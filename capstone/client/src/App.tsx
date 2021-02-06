@@ -7,6 +7,7 @@ import { NotFound } from './components/NotFound'
 import { CreateImage } from './components/CreateImage'
 import { CreateGroup } from './components/CreateGroup'
 import Auth from './auth/Auth'
+import { LogIn } from './components/Login'
 
 export interface AppProps {}
 
@@ -54,6 +55,10 @@ export default class App extends Component<AppProps, AppState> {
   }
 
   generateMenu() {
+    if (!this.props.auth.isAuthenticated()) {
+      return
+    }
+
     return (
       <Menu>
         <Menu.Item name="home">
@@ -82,6 +87,10 @@ export default class App extends Component<AppProps, AppState> {
   }
 
   generateCurrentPage() {
+    if (!this.props.auth.isAuthenticated()) {
+      return <LogIn auth={this.props.auth} />
+    }
+
     return (
       <Switch>
         <Route
@@ -92,17 +101,29 @@ export default class App extends Component<AppProps, AppState> {
           }}
         />
 
-        <Route path="/images/:groupId" exact component={ImagesList} />
+        {/* <Route path="/images/:groupId" exact component={ImagesList} /> */}
+        <Route path="/images/:groupId"
+          exact
+          render={(props) => {
+            return <ImagesList {...props} auth={this.props.auth}/>
+          }}
+        />
 
         <Route
           path="/images/:groupId/create"
           exact
-          render={props => {
+          render={(props) => {
             return <CreateImage {...props} auth={this.props.auth} />
           }}
         />
 
-        <Route path="/" exact component={GroupsList} />
+        <Route 
+          path="/"
+          exact 
+          render={props => {
+            return <GroupsList {...props} auth={this.props.auth} /> 
+          }}
+        />
 
         <Route component={NotFound} />
       </Switch>

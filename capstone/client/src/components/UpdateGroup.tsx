@@ -1,28 +1,44 @@
 import * as React from 'react'
 import { Form, Button, Checkbox } from 'semantic-ui-react'
-import { createGroup } from '../api/groups-api'
+import { updateGroup, getGroup } from '../api/groups-api'
 import Auth from '../auth/Auth'
+import { GroupModel } from '../types/GroupModel'
+import { GroupUploadInfo } from '../types/GroupUploadInfo'
 
-interface CreateGroupProps {
-  auth: Auth
+interface UpdateGroupProps {
+  auth: Auth,
+  groupId: string
 }
 
-interface CreateGroupState {
+interface UpdateGroupState {
   name: string
   description: string
   public: boolean
   uploadingGroup: boolean
 }
 
-export class CreateGroup extends React.PureComponent<
-  CreateGroupProps,
-  CreateGroupState
+export class UpdateGroup extends React.PureComponent<
+  UpdateGroupProps,
+  UpdateGroupState
 > {
-  state: CreateGroupState = {
+  state: UpdateGroupState = {
     name: '',
     description: '',
     public: false,
     uploadingGroup: false
+  }
+
+  async componentDidMount() {
+    try {
+        const group: GroupModel = await getGroup(this.props.auth.getIdToken(), this.props.groupId)
+        this.setState({
+            ...group,
+            public: group.public ? true : false,
+            uploadingGroup: false
+        })
+      } catch (e) {
+        alert(`Failed to fetch group : ${e.message}`)
+      }
   }
 
   handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -33,7 +49,7 @@ export class CreateGroup extends React.PureComponent<
     this.setState({ description: event.target.value })
   }
 
-  handlePublicChange = (event: React.MouseEvent<HTMLInputElement>) => {
+  handlePublicChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({public: !this.state.public})
   }
 
@@ -46,18 +62,20 @@ export class CreateGroup extends React.PureComponent<
         return
       }
 
-      this.setUploadState(true)
-      const group = await createGroup(this.props.auth.getIdToken(), {
+      const groupUpdate: GroupUploadInfo = {
         name: this.state.name,
         description: this.state.description,
         public: this.state.public ? 1 : 0
-      })
+      }
 
-      console.log('Created description', group)
+      this.setUploadState(true)
+      await updateGroup(this.props.auth.getIdToken(), this.props.groupId, groupUpdate)
+      console.log('Updated group')
+      alert('Group was updated!')
 
-      alert('Group was created!')
     } catch (e) {
       alert('Could not upload an image: ' + e.message)
+      
     } finally {
       this.setUploadState(false)
     }
@@ -72,7 +90,7 @@ export class CreateGroup extends React.PureComponent<
   render() {
     return (
       <div>
-        <h1>Upload new group</h1>
+        <h1>Update group</h1>
 
         <Form onSubmit={this.handleSubmit}>
           <Form.Field>
@@ -95,7 +113,7 @@ export class CreateGroup extends React.PureComponent<
             <label>Public</label>
             <input 
               type="checkbox"
-              onClick={this.handlePublicChange}
+              onChange={this.handlePublicChange}
               checked={this.state.public}
             />
           </Form.Field>
@@ -108,7 +126,7 @@ export class CreateGroup extends React.PureComponent<
   renderButton() {
     return (
       <Button loading={this.state.uploadingGroup} type="submit">
-        Create
+        Update
       </Button>
     )
   }

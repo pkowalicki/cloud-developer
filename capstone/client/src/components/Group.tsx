@@ -13,11 +13,19 @@ interface GroupCardState {
 export class Group extends React.PureComponent<GroupCardProps, GroupCardState> {
 
   render() {
+    let publicInfo
+
+    if (this.props.group.public){
+      publicInfo = 'Public'
+    } else {
+      publicInfo = 'Private'
+    }
+
     return (
       <Card>
         <Card.Content>
           <Card.Header>
-            <Link to={`/images/${this.props.group.id}`}>{this.props.group.name}</Link>
+            <Link to={`/images/${this.props.group.id}`}>{this.props.group.name} ({publicInfo})</Link>
           </Card.Header>
           <Card.Description>{this.props.group.description}</Card.Description>
         </Card.Content>

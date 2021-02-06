@@ -74,6 +74,9 @@ export class GroupAccess {
 
     logger.info(`New group created`, {...group})
 
+    if (group.public == 1)
+      await this.notifyClients(group.id)
+
     return group
   }
 

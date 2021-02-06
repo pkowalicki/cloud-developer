@@ -1,11 +1,14 @@
 import * as React from 'react'
 import { GroupModel } from '../types/GroupModel'
 import { Group } from './Group'
-import { getGroups } from '../api/groups-api'
+import { getGroups, getGroupsAuth } from '../api/groups-api'
 import { Card, Button, Divider } from 'semantic-ui-react'
 import { History } from 'history'
+import Auth from '../auth/Auth'
+import { EmailRegistration } from './EmailRegistration'
 
 interface GroupsListProps {
+  auth: Auth
   history: History
 }
 
@@ -24,7 +27,8 @@ export class GroupsList extends React.PureComponent<GroupsListProps, GroupsListS
 
   async componentDidMount() {
     try {
-      const groups = await getGroups()
+      //const groups = await getGroups()
+      const groups = await getGroupsAuth(this.props.auth.getIdToken())
       this.setState({
         groups
       })
@@ -46,6 +50,10 @@ export class GroupsList extends React.PureComponent<GroupsListProps, GroupsListS
         >
           Create new group
         </Button>
+
+        <Divider clearing />
+
+        <EmailRegistration auth={this.props.auth} />
 
         <Divider clearing />
 

@@ -37,3 +37,7 @@ export async function updateGroup(user: string, groupId: string, updateRequest: 
   // TODO  send notifications for connected clients if public changes to true
   return await groupAccess.updateGroup(user,groupId,updateRequest as GroupUpdate)
 }
+
+export async function getGroup(group: string): Promise<Group> {
+  return groupAccess.findGroup(group)
+}
