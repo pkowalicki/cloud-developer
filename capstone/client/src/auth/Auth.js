@@ -1,5 +1,6 @@
 import auth0 from 'auth0-js';
 import { authConfig } from '../config';
+import { decode } from 'jsonwebtoken'
 
 export default class Auth {
   accessToken;
@@ -100,5 +101,11 @@ export default class Auth {
     // access token's expiry time
     let expiresAt = this.expiresAt;
     return new Date().getTime() < expiresAt;
+  }
+
+  parseUserId() {
+    const decodedJwt = decode(this.getIdToken())
+    console.log('Decoded token:', decodedJwt)
+    return decodedJwt.sub
   }
 }

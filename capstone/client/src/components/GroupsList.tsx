@@ -59,7 +59,7 @@ export class GroupsList extends React.PureComponent<GroupsListProps, GroupsListS
 
         <Card.Group>
           {this.state.groups.map(group => {
-            return <Group key={group.id} group={group} />
+            return <Group key={group.id} group={group} auth={this.props.auth}/>
           })}
         </Card.Group>
       </div>

@@ -29,12 +29,15 @@ export async function createGroup(newGroup: CreateGroupRequest, user: string): P
   })
 }
 
-export async function groupExists(id: string): Promise<boolean> {
-  return groupAccess.findGroup(id) ? true : false
+export function isMyGroup(user: string, group: Group): boolean {
+  return group.userId === user
+}
+
+export function canSeeImages(user: string, group: Group): boolean {
+  return (group.userId === user) || group.public === 1
 }
 
 export async function updateGroup(user: string, groupId: string, updateRequest: UpdateGroupRequest): Promise<boolean> {
-  // TODO  send notifications for connected clients if public changes to true
   return await groupAccess.updateGroup(user,groupId,updateRequest as GroupUpdate)
 }
 

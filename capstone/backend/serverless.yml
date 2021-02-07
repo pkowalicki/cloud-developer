@@ -40,7 +40,7 @@ provider:
 
     IMAGES_S3_BUCKET: serverless-udagram-images-pkowalic-${self:provider.stage}
     SIGNED_URL_EXPIRATION: 300
-    THUMBNAILS_S3_BUCKET: serverless-udagram-thumbnail-pkowalic-${self:provider.stage}
+    # THUMBNAILS_S3_BUCKET: serverless-udagram-thumbnail-pkowalic-${self:provider.stage}
 
     EMAIL: udacitypkowalic@gmail.com
 
@@ -54,72 +54,72 @@ provider:
         - codedeploy:*
       Resource:
         - '*'
-    - Effect: Allow
-      Action:
-        - dynamodb:Scan
-        - dynamodb:PutItem
-        - dynamodb:GetItem
-        - dynamodb:Query
-        - dynamodb:UpdateItem
-      Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.GROUPS_TABLE}
-    - Effect: Allow
-      Action:
-        - dynamodb:Scan
-        - dynamodb:GetItem
-        - dynamodb:PutItem
-        - dynamodb:Query
-      Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.IMAGES_TABLE}
-    - Effect: Allow
-      Action:
-        - dynamodb:Query
-      Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.IMAGES_TABLE}/index/${self:provider.environment.IMAGE_ID_INDEX}
-    - Effect: Allow
-      Action:
-        - dynamodb:Query
-      Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.GROUPS_TABLE}/index/${self:provider.environment.GROUPS_ID_INDEX}
-    - Effect: Allow
-      Action:
-        - dynamodb:Query
-      Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.GROUPS_TABLE}/index/${self:provider.environment.GROUPS_PUBLIC_INDEX}
-    - Effect: Allow
-      Action:
-        - s3:PutObject
-        - s3:GetObject
-      Resource: arn:aws:s3:::${self:provider.environment.IMAGES_S3_BUCKET}/*
-    - Effect: Allow
-      Action:
-        - s3:PutObject
-      Resource: "arn:aws:s3:::${self:provider.environment.THUMBNAILS_S3_BUCKET}/*"
-    - Effect: Allow
-      Action:
-        - dynamodb:Scan
-        - dynamodb:PutItem
-        - dynamodb:DeleteItem
-      Resource: arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.CONNECTIONS_TABLE}
-    - Effect: Allow
-      Action:
-        - dynamodb:PutItem
-        - dynamodb:Query
-        - dynamodb:DeleteItem
-      Resource: arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.EMAILS_TABLE}
-    - Effect: Allow
-      Action:
-        - SNS:CreateTopic
-        - SNS:Publish
-        - SNS:GetTopicAttributes
-      Resource: arn:aws:sns:${opt:region, self:provider.region}:*:${self:provider.environment.TOPIC}
-    - Effect: Allow
-      Action:
-        - ses:SendEmail
-        - ses:SendRawEmail
-      Resource: arn:aws:ses:${opt:region, self:provider.region}:*:identity/*
-    - Effect: Allow
-      Action:
-        - ses:ListVerifiedEmailAddresses
-        - ses:VerifyEmailIdentity
-        - ses:DeleteIdentity
-      Resource:
-        - '*'
+    # - Effect: Allow
+    #   Action:
+    #     - dynamodb:Scan
+    #     - dynamodb:PutItem
+    #     - dynamodb:GetItem
+    #     - dynamodb:Query
+    #     - dynamodb:UpdateItem
+    #   Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.GROUPS_TABLE}
+    # - Effect: Allow
+    #   Action:
+    #     - dynamodb:Scan
+    #     - dynamodb:GetItem
+    #     - dynamodb:PutItem
+    #     - dynamodb:Query
+    #   Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.IMAGES_TABLE}
+    # - Effect: Allow
+    #   Action:
+    #     - dynamodb:Query
+    #   Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.IMAGES_TABLE}/index/${self:provider.environment.IMAGE_ID_INDEX}
+    # - Effect: Allow
+    #   Action:
+    #     - dynamodb:Query
+    #   Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.GROUPS_TABLE}/index/${self:provider.environment.GROUPS_ID_INDEX}
+    # - Effect: Allow
+    #   Action:
+    #     - dynamodb:Query
+    #   Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.GROUPS_TABLE}/index/${self:provider.environment.GROUPS_PUBLIC_INDEX}
+    # - Effect: Allow
+    #   Action:
+    #     - s3:PutObject
+    #     - s3:GetObject
+    #   Resource: arn:aws:s3:::${self:provider.environment.IMAGES_S3_BUCKET}/*
+    # - Effect: Allow
+    #   Action:
+    #     - s3:PutObject
+    #   Resource: "arn:aws:s3:::${self:provider.environment.THUMBNAILS_S3_BUCKET}/*"
+    # - Effect: Allow
+    #   Action:
+    #     - dynamodb:Scan
+    #     - dynamodb:PutItem
+    #     - dynamodb:DeleteItem
+    #   Resource: arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.CONNECTIONS_TABLE}
+    # - Effect: Allow
+    #   Action:
+    #     - dynamodb:PutItem
+    #     - dynamodb:Query
+    #     - dynamodb:DeleteItem
+    #   Resource: arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.EMAILS_TABLE}
+    # - Effect: Allow
+    #   Action:
+    #     - SNS:CreateTopic
+    #     - SNS:Publish
+    #     - SNS:GetTopicAttributes
+    #   Resource: arn:aws:sns:${opt:region, self:provider.region}:*:${self:provider.environment.TOPIC}
+    # - Effect: Allow
+    #   Action:
+    #     - ses:SendEmail
+    #     - ses:SendRawEmail
+    #   Resource: arn:aws:ses:${opt:region, self:provider.region}:*:identity/*
+    # - Effect: Allow
+    #   Action:
+    #     - ses:ListVerifiedEmailAddresses
+    #     - ses:VerifyEmailIdentity
+    #     - ses:DeleteIdentity
+    #   Resource:
+    #     - '*'
     # - Effect: Allow
     #   Action:
     #     - secretsmanager:GetSecretValue
@@ -166,8 +166,6 @@ functions:
   RS256Auth:
     handler: src/lambda/auth/rs256Auth0Authorizer.handler
 
-  # Auth:
-  #   handler: src/lambda/auth/auth0Authorizer.handler
 
   GetGroups:
     handler: src/lambda/http/getGroups.handler
@@ -177,6 +175,16 @@ functions:
           path: groups
           cors: true
           authorizer: RS256Auth
+    iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+      Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.GROUPS_TABLE}
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+      Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.GROUPS_TABLE}/index/${self:provider.environment.GROUPS_PUBLIC_INDEX}
+      
 
   GetGroup:
     handler: src/lambda/http/getGroup.handler
@@ -186,6 +194,16 @@ functions:
           path: groups/{groupId}
           cors: true
           authorizer: RS256Auth
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.GROUPS_TABLE}
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.GROUPS_TABLE}/index/${self:provider.environment.GROUPS_ID_INDEX}
+
 
   CreateGroup:
     handler: src/lambda/http/createGroup.handler
@@ -201,9 +219,25 @@ functions:
             description: Create a new group
             requestModels:
               'application/json': GroupRequest
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:PutItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.GROUPS_TABLE}
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.GROUPS_TABLE}/index/${self:provider.environment.GROUPS_ID_INDEX}
+      - Effect: Allow
+        Action:
+          - SNS:CreateTopic
+          - SNS:Publish
+          - SNS:GetTopicAttributes
+        Resource: arn:aws:sns:${opt:region, self:provider.region}:*:${self:provider.environment.TOPIC}
     # deploymentSettings:
     #   type: Linear10PercentEvery1Minute
     #   alias: Live
+
 
   UpdateGroup:
     handler: src/lambda/http/updateGroup.handler
@@ -218,7 +252,23 @@ functions:
             summary: Update a group
             description: Update a group
             requestModels:
-              'application/json': GroupUpdateRequest  
+              'application/json': GroupUpdateRequest
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:UpdateItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.GROUPS_TABLE}
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.GROUPS_TABLE}/index/${self:provider.environment.GROUPS_ID_INDEX}
+      - Effect: Allow
+        Action:
+          - SNS:CreateTopic
+          - SNS:Publish
+          - SNS:GetTopicAttributes
+        Resource: arn:aws:sns:${opt:region, self:provider.region}:*:${self:provider.environment.TOPIC}
+
 
   GetImages:
     handler: src/lambda/http/getImages.handler
@@ -227,6 +277,16 @@ functions:
           method: get
           path: groups/{groupId}/images
           cors: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.GROUPS_TABLE}/index/${self:provider.environment.GROUPS_ID_INDEX}
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.IMAGES_TABLE}
+
 
   CreateImage:
     handler: src/lambda/http/createImage.handler
@@ -242,8 +302,23 @@ functions:
             description: Create a new image
             requestModels:
               'application/json': ImageRequest
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.GROUPS_TABLE}/index/${self:provider.environment.GROUPS_ID_INDEX}
+      - Effect: Allow
+        Action:
+          - dynamodb:PutItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.IMAGES_TABLE}
+      - Effect: Allow
+        Action:
+          - s3:PutObject
+          - s3:GetObject
+        Resource: arn:aws:s3:::${self:provider.environment.IMAGES_S3_BUCKET}/*
 
-  SendGroupUpdateNotifications:
+
+  Notifications:
     environment:
       STAGE: ${self:provider.stage}
       API_ID:
@@ -259,8 +334,20 @@ functions:
                 - Ref: AWS::AccountId
                 - ${self:custom.topicName}
           topicName: ${self:custom.topicName}
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Scan
+          - dynamodb:DeleteItem
+        Resource: arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.CONNECTIONS_TABLE}
+      - Effect: Allow
+        Action:
+          - execute-api:Invoke
+          - execute-api:ManageConnections
+        Resource: arn:aws:execute-api:${opt:region, self:provider.region}:*:*
 
-  SendGroupUpdateEmailNotifications:
+
+  EmailNotifications:
     handler: src/lambda/sns/sendEmailNotifications.handler
     events:
       - sns:
@@ -272,6 +359,18 @@ functions:
                 - Ref: AWS::AccountId
                 - ${self:custom.topicName}
           topicName: ${self:custom.topicName}
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - ses:SendEmail
+          - ses:SendRawEmail
+        Resource: arn:aws:ses:${opt:region, self:provider.region}:*:identity/*
+      - Effect: Allow
+        Action:
+          - ses:ListVerifiedEmailAddresses
+        Resource:
+          - '*'
+
 
   RegisterEmail:
     handler: src/lambda/http/registerEmail.handler
@@ -287,6 +386,17 @@ functions:
             description: Register new Email
             requestModels:
               'application/json': RegisterEmailRequest
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - ses:VerifyEmailIdentity
+        Resource:
+          - '*'
+      - Effect: Allow
+        Action:
+          - dynamodb:PutItem
+        Resource: arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.EMAILS_TABLE}
+
 
   GetEmail:
     handler: src/lambda/http/getEmail.handler
@@ -296,6 +406,12 @@ functions:
           path: emails
           cors: true
           authorizer: RS256Auth
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+        Resource: arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.EMAILS_TABLE}
+
 
   DeregisterEmail:
     handler: src/lambda/http/deregisterEmail.handler
@@ -305,6 +421,17 @@ functions:
           path: emails
           cors: true
           authorizer: RS256Auth
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - ses:DeleteIdentity
+        Resource:
+          - '*'
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+          - dynamodb:DeleteItem
+        Resource: arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.EMAILS_TABLE}
 
   # ResizeImage:
   #   handler: src/lambda/s3/resizeImage.handler
@@ -319,17 +446,29 @@ functions:
   #               - ${self:custom.topicName}
   #         topicName: ${self:custom.topicName}
 
+
   ConnectHandler:
     handler: src/lambda/websocket/connect.handler
     events:
       - websocket:
           route: $connect
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:PutItem
+        Resource: arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.CONNECTIONS_TABLE}
+
 
   DisconnectHandler:
     handler: src/lambda/websocket/disconnect.handler
     events:
       - websocket:
           route: $disconnect
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:DeleteItem
+        Resource: arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.CONNECTIONS_TABLE}
 
   # SyncWithElasticsearch:
   #   environment:
@@ -502,10 +641,10 @@ resources:
         Topics:
           - !Ref GroupUpdateTopic
 
-    ThumbnailsBucket:
-      Type: AWS::S3::Bucket
-      Properties:
-        BucketName: ${self:provider.environment.THUMBNAILS_S3_BUCKET}
+    # ThumbnailsBucket:
+    #   Type: AWS::S3::Bucket
+    #   Properties:
+    #     BucketName: ${self:provider.environment.THUMBNAILS_S3_BUCKET}
 
     GroupUpdateTopic:
       Type: AWS::SNS::Topic
