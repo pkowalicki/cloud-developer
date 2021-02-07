@@ -90,7 +90,7 @@ export class UpdateGroup extends React.PureComponent<
   render() {
     return (
       <div>
-        <h1>Update group</h1>
+        <h3>Group belongs to you. You can upload images and update group.</h3>
 
         <Form onSubmit={this.handleSubmit}>
           <Form.Field>

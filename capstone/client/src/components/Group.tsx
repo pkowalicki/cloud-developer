@@ -16,24 +16,27 @@ export class Group extends React.PureComponent<GroupCardProps, GroupCardState> {
 
   render() {
     let publicInfo
-
-    if (this.props.group.public)
-      publicInfo = 'Public'
-    else
-      publicInfo = 'Private'
-
     let ownershipInfo
+    const user = this.props.auth.parseUserId()
 
-    if (this.props.group.userId == this.props.auth.parseUserId())
-      ownershipInfo = 'Mine'
-    else
-      ownershipInfo = 'Others'
+    if (this.props.group.public) {
+      publicInfo = '(Public)'
+
+      if (this.props.group.userId === user)
+        ownershipInfo = '(Mine)'
+      else
+        ownershipInfo = '(Others)'
+    }
+    else {
+      publicInfo = '(Private)'
+      ownershipInfo = ''
+    }
 
     return (
       <Card>
         <Card.Content>
           <Card.Header>
-            <Link to={`/images/${this.props.group.id}`}>{this.props.group.name} ({publicInfo}) ({ownershipInfo})</Link>
+            <Link to={`/images/${this.props.group.id}`}>{this.props.group.name} {publicInfo}{ownershipInfo}</Link>
           </Card.Header>
           <Card.Description>{this.props.group.description}</Card.Description>
         </Card.Content>

@@ -33,7 +33,7 @@ export class CreateGroup extends React.PureComponent<
     this.setState({ description: event.target.value })
   }
 
-  handlePublicChange = (event: React.MouseEvent<HTMLInputElement>) => {
+  handlePublicChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({public: !this.state.public})
   }
 
@@ -95,7 +95,7 @@ export class CreateGroup extends React.PureComponent<
             <label>Public</label>
             <input 
               type="checkbox"
-              onClick={this.handlePublicChange}
+              onChange={this.handlePublicChange}
               checked={this.state.public}
             />
           </Form.Field>
