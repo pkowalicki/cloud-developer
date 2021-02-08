@@ -6,7 +6,7 @@ import { UdagramImage } from './UdagramImage'
 import { History } from 'history'
 import { UpdateGroup } from './UpdateGroup'
 import Auth from '../auth/Auth'
-import { getGroup } from '../api/groups-api'
+import { deleteGroup, getGroup } from '../api/groups-api'
 
 interface ImagesListProps {
   history: History
@@ -39,6 +39,12 @@ export class ImagesList extends React.PureComponent<
     this.props.history.push(`/images/${this.props.match.params.groupId}/create`)
   }
 
+  handleDeleteGroup = async () => {
+    console.log('Deleting group')
+    await deleteGroup(this.props.auth.getIdToken(), this.props.match.params.groupId)
+    alert('Group deleted succesfully! Go to Home page.')
+  }
+
   async componentDidMount() {
     try {
       const images = await getImagesAuth(this.props.auth.getIdToken(), this.props.match.params.groupId)
@@ -67,6 +73,15 @@ export class ImagesList extends React.PureComponent<
               onClick={this.handleCreateImage}
             >
               Upload new image
+            </Button>
+
+            <Button
+              negative
+              size="huge"
+              className="add-button"
+              onClick={this.handleDeleteGroup}
+            >
+              Delete group
             </Button>
 
             <Divider clearing />

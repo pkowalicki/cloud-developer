@@ -33,6 +33,26 @@ export class ImageAccess {
         return items as Image[]
     }
 
+    async deleteImages(group: string): Promise<void> {
+        const images: Image[] = await this.getImages(group)
+        logger.info(`${images.length} images from group ${group} will be deleted`)
+
+        for (const image of images) {
+            await this.docClient.delete({
+                TableName: this.imagesTable,
+                Key : {
+                    groupId: group,
+                    createdAt: image.createdAt
+                }
+            }).promise()
+
+            await this.s3Client.deleteObject({
+                Bucket: bucketName,
+                Key: image.id
+            }).promise()
+        }
+    }
+
     async findImage(id: string): Promise<Image> {
         const result = await this.docClient.query({
             TableName: this.imagesTable,

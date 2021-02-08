@@ -142,6 +142,20 @@ export class GroupAccess {
     return undefined
   }
 
+  async deleteGroup(groupId: string, user: string): Promise<void> {
+    const group: Group = await this.findGroup(groupId)
+
+    await this.docClient.delete({
+      TableName: this.groupsTable,
+      Key: {
+        userId: user,
+        createdAt: group.createdAt
+      }
+    }).promise()
+
+    logger.info(`Group ${groupId} deleted.`, {groupId, user})
+  }
+
   private async notifyClients(group: string) {
     const topic = await this.snsClient.createTopic({Name:this.topicName}).promise()
     const topicArn: string = topic.TopicArn

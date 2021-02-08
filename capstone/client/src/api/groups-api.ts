@@ -43,6 +43,7 @@ export async function createGroup(
     })
   })
   const result = await reply.json()
+  
   return result.newItem
 }
 
@@ -66,4 +67,14 @@ export async function updateGroup(idToken: string, groupId: string, newGroup: Gr
     },
   })
   console.log('Group updated')
+}
+
+export async function deleteGroup(idToken: string, groupId: string): Promise<void> {
+  const response = await Axios.delete(`${apiEndpoint}/groups/${groupId}`, {
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${idToken}`
+    },
+  })
+  console.log('Group deleted') 
 }

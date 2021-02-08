@@ -9,6 +9,10 @@ export async function getImages(group: string): Promise<Image[]> {
     return imageAccess.getImages(group)
 }
 
+export async function deleteImages(group: string): Promise<void> {
+    await imageAccess.deleteImages(group)
+}
+
 export async function getImage(id: string): Promise<Image> {
     return imageAccess.findImage(id)
 }

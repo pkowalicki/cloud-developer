@@ -105,7 +105,6 @@ export default class Auth {
 
   parseUserId() {
     const decodedJwt = decode(this.getIdToken())
-    console.log('Decoded token:', decodedJwt)
     return decodedJwt.sub
   }
 }

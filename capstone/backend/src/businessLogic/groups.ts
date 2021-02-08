@@ -44,3 +44,7 @@ export async function updateGroup(user: string, groupId: string, updateRequest: 
 export async function getGroup(group: string): Promise<Group> {
   return groupAccess.findGroup(group)
 }
+
+export async function deleteGroup(group: string, user: string): Promise<void> {
+  await groupAccess.deleteGroup(group, user)
+}

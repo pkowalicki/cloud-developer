@@ -5,14 +5,7 @@ plugins:
   - serverless-webpack
   - serverless-reqvalidator-plugin
   - serverless-aws-documentation
-  # - serverless-plugin-canary-deployments
   - serverless-iam-roles-per-function
-  # - serverless-dynamodb-local
-  # - serverless-offline
-
-# Uncomment to enable individual packaging
-# package:
-#   individually: true
 
 provider:
   name: aws
@@ -40,13 +33,10 @@ provider:
 
     IMAGES_S3_BUCKET: serverless-udagram-images-pkowalic-${self:provider.stage}
     SIGNED_URL_EXPIRATION: 300
-    # THUMBNAILS_S3_BUCKET: serverless-udagram-thumbnail-pkowalic-${self:provider.stage}
 
     EMAIL: udacitypkowalic@gmail.com
 
     TOPIC: ${self:custom.topicName}
-    # AUTH_0_SECRET_ID: Auth0Secret-${self:provider.stage}
-    # AUTH_0_SECRET_FIELD: auth0Secret
 
   iamRoleStatements:
     - Effect: Allow
@@ -54,92 +44,9 @@ provider:
         - codedeploy:*
       Resource:
         - '*'
-    # - Effect: Allow
-    #   Action:
-    #     - dynamodb:Scan
-    #     - dynamodb:PutItem
-    #     - dynamodb:GetItem
-    #     - dynamodb:Query
-    #     - dynamodb:UpdateItem
-    #   Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.GROUPS_TABLE}
-    # - Effect: Allow
-    #   Action:
-    #     - dynamodb:Scan
-    #     - dynamodb:GetItem
-    #     - dynamodb:PutItem
-    #     - dynamodb:Query
-    #   Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.IMAGES_TABLE}
-    # - Effect: Allow
-    #   Action:
-    #     - dynamodb:Query
-    #   Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.IMAGES_TABLE}/index/${self:provider.environment.IMAGE_ID_INDEX}
-    # - Effect: Allow
-    #   Action:
-    #     - dynamodb:Query
-    #   Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.GROUPS_TABLE}/index/${self:provider.environment.GROUPS_ID_INDEX}
-    # - Effect: Allow
-    #   Action:
-    #     - dynamodb:Query
-    #   Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.GROUPS_TABLE}/index/${self:provider.environment.GROUPS_PUBLIC_INDEX}
-    # - Effect: Allow
-    #   Action:
-    #     - s3:PutObject
-    #     - s3:GetObject
-    #   Resource: arn:aws:s3:::${self:provider.environment.IMAGES_S3_BUCKET}/*
-    # - Effect: Allow
-    #   Action:
-    #     - s3:PutObject
-    #   Resource: "arn:aws:s3:::${self:provider.environment.THUMBNAILS_S3_BUCKET}/*"
-    # - Effect: Allow
-    #   Action:
-    #     - dynamodb:Scan
-    #     - dynamodb:PutItem
-    #     - dynamodb:DeleteItem
-    #   Resource: arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.CONNECTIONS_TABLE}
-    # - Effect: Allow
-    #   Action:
-    #     - dynamodb:PutItem
-    #     - dynamodb:Query
-    #     - dynamodb:DeleteItem
-    #   Resource: arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.EMAILS_TABLE}
-    # - Effect: Allow
-    #   Action:
-    #     - SNS:CreateTopic
-    #     - SNS:Publish
-    #     - SNS:GetTopicAttributes
-    #   Resource: arn:aws:sns:${opt:region, self:provider.region}:*:${self:provider.environment.TOPIC}
-    # - Effect: Allow
-    #   Action:
-    #     - ses:SendEmail
-    #     - ses:SendRawEmail
-    #   Resource: arn:aws:ses:${opt:region, self:provider.region}:*:identity/*
-    # - Effect: Allow
-    #   Action:
-    #     - ses:ListVerifiedEmailAddresses
-    #     - ses:VerifyEmailIdentity
-    #     - ses:DeleteIdentity
-    #   Resource:
-    #     - '*'
-    # - Effect: Allow
-    #   Action:
-    #     - secretsmanager:GetSecretValue
-    #   Resource: !Ref Auth0Secret
-    # - Effect: Allow
-    #   Action:
-    #     - kms:Decrypt
-    #   Resource: !GetAtt KMSKey.Arn
 
 custom:
   topicName: GroupUpdateTopic-${self:provider.stage}
-
-  # serverless-offline:
-  #   port: 3003
-
-  # dynamodb:
-  #   start:
-  #     port: 8000
-  #     inMemory: true
-  #     migrate: true
 
   documentation:
     api:
@@ -234,9 +141,6 @@ functions:
           - SNS:Publish
           - SNS:GetTopicAttributes
         Resource: arn:aws:sns:${opt:region, self:provider.region}:*:${self:provider.environment.TOPIC}
-    # deploymentSettings:
-    #   type: Linear10PercentEvery1Minute
-    #   alias: Live
 
 
   UpdateGroup:
@@ -268,6 +172,35 @@ functions:
           - SNS:Publish
           - SNS:GetTopicAttributes
         Resource: arn:aws:sns:${opt:region, self:provider.region}:*:${self:provider.environment.TOPIC}
+
+
+  DeleteGroup:
+    handler: src/lambda/http/deleteGroup.handler
+    events:
+      - http:
+          method: delete
+          path: groups/{groupId}
+          cors: true
+          authorizer: RS256Auth
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+          - dynamodb:DeleteItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.GROUPS_TABLE}
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.GROUPS_TABLE}/index/${self:provider.environment.GROUPS_ID_INDEX}
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+          - dynamodb:DeleteItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.IMAGES_TABLE}
+      - Effect: Allow
+        Action:
+          - s3:DeleteObject
+        Resource: arn:aws:s3:::${self:provider.environment.IMAGES_S3_BUCKET}/*
 
 
   GetImages:
@@ -433,19 +366,6 @@ functions:
           - dynamodb:DeleteItem
         Resource: arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.EMAILS_TABLE}
 
-  # ResizeImage:
-  #   handler: src/lambda/s3/resizeImage.handler
-  #   events:
-  #     - sns:
-  #         arn:
-  #           Fn::Join:
-  #             - ':'
-  #             - - arn:aws:sns
-  #               - Ref: AWS::Region
-  #               - Ref: AWS::AccountId
-  #               - ${self:custom.topicName}
-  #         topicName: ${self:custom.topicName}
-
 
   ConnectHandler:
     handler: src/lambda/websocket/connect.handler
@@ -469,15 +389,6 @@ functions:
         Action:
           - dynamodb:DeleteItem
         Resource: arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.CONNECTIONS_TABLE}
-
-  # SyncWithElasticsearch:
-  #   environment:
-  #     ES_ENDPOINT: !GetAtt ImagesSearch.DomainEndpoint
-  #   handler: src/lambda/dynamoDb/elasticSearchSync.handler
-  #   events:
-  #     - stream:
-  #         type: dynamodb
-  #         arn: !GetAtt ImagesDynamoDBTable.StreamArn
 
 resources:
   Resources:
@@ -541,8 +452,6 @@ resources:
           - AttributeName: createdAt
             KeyType: RANGE
         BillingMode: PAY_PER_REQUEST
-        # StreamSpecification:
-        #   StreamViewType: NEW_IMAGE
         TableName: ${self:provider.environment.IMAGES_TABLE}
         GlobalSecondaryIndexes:
           - IndexName: ${self:provider.environment.IMAGE_ID_INDEX}
@@ -587,13 +496,8 @@ resources:
 
     AttachmentsBucket:
       Type: AWS::S3::Bucket
-      #DependsOn: SNSTopicPolicy
       Properties:
         BucketName: ${self:provider.environment.IMAGES_S3_BUCKET}
-        # NotificationConfiguration:
-        #   TopicConfigurations:
-        #     - Event: s3:ObjectCreated:Put
-        #       Topic: !Ref ImagesTopic
         CorsConfiguration:
           CorsRules:
             -
@@ -641,10 +545,6 @@ resources:
         Topics:
           - !Ref GroupUpdateTopic
 
-    # ThumbnailsBucket:
-    #   Type: AWS::S3::Bucket
-    #   Properties:
-    #     BucketName: ${self:provider.environment.THUMBNAILS_S3_BUCKET}
 
     GroupUpdateTopic:
       Type: AWS::SNS::Topic
@@ -652,62 +552,5 @@ resources:
         DisplayName: Group update topic
         TopicName: ${self:custom.topicName}
 
-    # ImagesSearch:
-    #   Type: AWS::Elasticsearch::Domain
-    #   Properties:
-    #     ElasticsearchVersion: '6.3'
-    #     DomainName: images-search-${self:provider.stage}
-    #     ElasticsearchClusterConfig:
-    #       DedicatedMasterEnabled: false
-    #       InstanceCount: '1'
-    #       ZoneAwarenessEnabled: false
-    #       InstanceType: t2.small.elasticsearch
-    #     EBSOptions:
-    #       EBSEnabled: true
-    #       Iops: 0
-    #       VolumeSize: 10
-    #       VolumeType: 'gp2'
 
-    #     AccessPolicies:
-    #       Version: '2012-10-17'
-    #       Statement:
-    #         -
-    #           Effect: Allow
-    #           Principal:
-    #             AWS: '*'
-    #           Action: 'es:*'
-    #           Resource: '*'
 
-    # KMSKey:
-    #   Type: AWS::KMS::Key
-    #   Properties:
-    #     Description: KMS key to encrypt Auth0 secret
-    #     KeyPolicy:
-    #       Version: '2012-10-17'
-    #       Id: key-default-1
-    #       Statement:
-    #         - Sid: Allow administration of the key
-    #           Effect: Allow
-    #           Principal:
-    #             AWS:
-    #               Fn::Join:
-    #               - ':'
-    #               - - 'arn:aws:iam:'
-    #                 - Ref: AWS::AccountId
-    #                 - 'root'
-    #           Action:
-    #             - 'kms:*'
-    #           Resource: '*'
-
-    # KMSKeyAlias:
-    #   Type: AWS::KMS::Alias
-    #   Properties:
-    #     AliasName: alias/auth0Key-${self:provider.stage}
-    #     TargetKeyId: !Ref KMSKey
-
-    # Auth0Secret:
-    #   Type: AWS::SecretsManager::Secret
-    #   Properties:
-    #     Name: ${self:provider.environment.AUTH_0_SECRET_ID}
-    #     Description: Auth0 secret
-    #     KmsKeyId: !Ref KMSKey
