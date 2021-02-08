@@ -6,9 +6,10 @@ import { getUserId } from '../utils'
 import { Group } from '../../models/Group'
 import { deleteImages } from '../../businessLogic/images'
 
-const logger = createLogger('lambda-http-update-group')
+const logger = createLogger('lambda-http-delete-group')
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+    logger.info(`Processing event`, { ...event })
     const groupId: string = event.pathParameters.groupId
     const group: Group = await getGroup(groupId)
     const user: string = getUserId(event)

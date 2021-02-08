@@ -13,8 +13,6 @@ import { Group } from '../../models/Group'
 export const handler = middy(async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   const groupId = event.pathParameters.groupId
   const user = getUserId(event)
-
-  //const validGroupId = await groupExists(groupId)
   const group: Group = await getGroup(groupId)
 
   if (!group) {

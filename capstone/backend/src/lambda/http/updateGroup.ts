@@ -9,6 +9,7 @@ import { Group } from '../../models/Group'
 const logger = createLogger('lambda-http-update-group')
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+    logger.info(`Processing event`, { ...event })
     const groupId: string = event.pathParameters.groupId
     const group: Group = await getGroup(groupId)
     const updateRequest: UpdateGroupRequest = JSON.parse(event.body)

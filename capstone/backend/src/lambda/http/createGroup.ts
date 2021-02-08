@@ -9,6 +9,7 @@ import { getUserId } from '../utils'
 const logger = createLogger('lambda-http-create-group')
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+  logger.info(`Processing event`, { ...event })
   const newGroupRequest: CreateGroupRequest = JSON.parse(event.body)
   logger.info(`Processing new group request`, {...newGroupRequest})
   const user: string = getUserId(event)

@@ -89,6 +89,7 @@ export class ImageAccess {
             Item: newItem
         }).promise()
 
+        logger.info(`Image created`, {...newItem})
         const uploadUrl: string = await this.getUploadUrl(newImage.id)
         
         return {

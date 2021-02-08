@@ -1,10 +1,13 @@
 import { APIGatewayProxyHandler, APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import 'source-map-support/register'
 import { canSeeImages, getGroup } from '../../businessLogic/groups'
+import { createLogger } from '../../utils/logger'
 import { getUserId } from '../utils'
 
+const logger = createLogger('lambda-http-get-group')
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+  logger.info(`Processing event`, { ...event })
   const groupId = event.pathParameters.groupId
   const group = await getGroup(groupId)
   const user = getUserId(event)

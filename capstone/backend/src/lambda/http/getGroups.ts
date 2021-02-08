@@ -8,7 +8,7 @@ import { getAllGroups } from '../../businessLogic/groups';
 const logger = createLogger('lambda-http-get-groups')
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  logger.info(`Processing event: ${JSON.stringify(event)}`, {event: JSON.stringify(event)})
+  logger.info(`Processing event`, {...event})
   const user = getUserId(event)
   const items = await getAllGroups(user)
   logger.info(`Groups for user ${user} found.`)

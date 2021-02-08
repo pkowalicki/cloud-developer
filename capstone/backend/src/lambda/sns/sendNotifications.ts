@@ -13,7 +13,7 @@ const connectionParams = {
 }
 
 const apiGateway = new AWS.ApiGatewayManagementApi(connectionParams)
-const logger = createLogger('lambda-send-notifications')
+const logger = createLogger('lambda-send-ws-notifications')
 const connectionsAccess = new ConnectionsAccess()
 
 export const handler: SNSHandler = async (event: SNSEvent) => {
